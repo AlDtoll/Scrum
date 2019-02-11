@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Scrum</string>
+    <string name="pause">Пауза</string>
+    <string name="healself">лечиться</string>
+    <string name="wait">ждать</string>
+    <string name="retreat">отступить</string>
+    <string name="defaultworld">defaultWorld</string>
+    <string name="nameOfHero">Имя героя</string>
+    <string name="descriptionOfHero">описание героя</string>
+    <string name="nameOfEnemy">имя врага</string>
+    <string name="descriptionOfEnemy">описание врага</string>
+    <string name="nameOfPlace">имя места</string>
+    <string name="descriptionOfPlace">описание места</string>
+    <string name="title">Заголовок</string>
+    <string name="ready_to_battle">К бою готов!</string>
+    <string name="history_is_writing">история пишется...</string>
+    <string name="hero_presentation">отображение героя</string>
+    <string name="_10_10">10/10</string>
+    <string name="question">\?/?</string>
+    <string name="enemy_presentation">отображение противника</string>
+</resources>
