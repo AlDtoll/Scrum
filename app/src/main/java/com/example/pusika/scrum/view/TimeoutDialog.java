@@ -1,6 +1,5 @@
 package com.example.pusika.scrum.view;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -16,19 +15,17 @@ import com.example.pusika.scrum.R;
 import com.example.pusika.scrum.model.ConditionOf;
 import com.example.pusika.scrum.model.EffectOfAction;
 import com.example.pusika.scrum.model.ScrumAction;
-import com.example.pusika.scrum.model.Status;
+import com.example.pusika.scrum.presenter.DirectorPresenter;
 
 import java.util.ArrayList;
 
-import static com.example.pusika.scrum.view.MainActivity.HERO_STATUSES;
-import static com.example.pusika.scrum.view.MainActivity.RESULT_OF_ROUND;
-import static com.example.pusika.scrum.view.StartActivity.AUTO_ACTIONS;
-import static com.example.pusika.scrum.view.StartActivity.HERO_ACTIONS;
+import static com.example.pusika.scrum.presenter.DirectorPresenter.PRESENTER;
+import static com.example.pusika.scrum.presenter.DirectorPresenter.RESULT_OF_ROUND;
 
 public class TimeoutDialog extends DialogFragment implements View.OnClickListener {
 
     final String LOG_TAG = "myLogs";
-    Stuntman stuntman;
+    DirectorPresenter directorPresenter;
     /**
      * Блок с вьюхами
      */
@@ -42,24 +39,12 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
     //todo возможно стоит сделать еще и с картинками
     ArrayList<String> resultOfActions = new ArrayList<>();
     private boolean isClicked = false;
-    private ArrayList<Status> heroStatuses = new ArrayList<>();
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            stuntman = (Stuntman) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Stuntman");
-        }
-    }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        heroStatuses = (ArrayList) getArguments().getSerializable(HERO_STATUSES);
-        scrumHeroActions = (ArrayList) getArguments().getSerializable(HERO_ACTIONS);
-        scrumAutoActions = (ArrayList) getArguments().getSerializable(AUTO_ACTIONS);
+        directorPresenter = (DirectorPresenter) getArguments().getSerializable(PRESENTER);
+        scrumHeroActions = directorPresenter.getScene().getScrumHeroActions();
+        scrumAutoActions = directorPresenter.getScene().getScrumAutoActions();
         getDialog().setTitle("Раунд");
 
         //todo переделать timeout_dialog в recyclerView
@@ -91,12 +76,11 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
             timeoutDialogActionButtonDescription.setText(scrumAction.getDescriptionOfAction());
             timeoutDialogActionButton.setId(i);
             timeoutDialogActionButton.setOnClickListener(this);
-            if (ConditionOf.isCondition(scrumAction.getConditionsOfAction(), heroStatuses)) {
+            if (ConditionOf.isCondition(scrumAction.getConditionsOfAction(), directorPresenter.getScene().getHero().getStatuses())) {
                 listOfAction.addView(timeoutDialogActionButton);
             }
             i++;
         }
-
     }
 
     public void onClick(View v) {
@@ -122,22 +106,22 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
 
     private void executeAction(ArrayList<EffectOfAction> effectsOfAction) {
         for (EffectOfAction effectOfAction : effectsOfAction) {
-            if (ConditionOf.isCondition(effectOfAction.getConditionsOfEffect(), heroStatuses)) {
+            if (ConditionOf.isCondition(effectOfAction.getConditionsOfEffect(), directorPresenter.getScene().getHero().getStatuses())) {
                 switch (effectOfAction.getEffect()) {
                     case CHANGE_HERO_HP:
-                        stuntman.changeHeroHp(effectOfAction.getValue());
+                        directorPresenter.changeHeroHp(effectOfAction.getValue());
                         break;
                     case CHANGE_HERO_STATUS:
-                        stuntman.changeHeroStatus(effectOfAction.getStatus());
+                        directorPresenter.changeHeroStatus(effectOfAction.getStatus());
                         break;
                     case CHANGE_ENEMY_HP:
-                        stuntman.changeEnemyHp(effectOfAction.getValue());
+                        directorPresenter.changeEnemyHp(effectOfAction.getValue());
                         break;
                     case CHANGE_TIME:
-                        stuntman.changeTime(effectOfAction.getValue());
+                        directorPresenter.changeTime(effectOfAction.getValue());
                         break;
                     case CHANGE_ROUND_TIME:
-                        stuntman.changeRoundTime(effectOfAction.getValue());
+                        directorPresenter.changeRoundTime(effectOfAction.getValue());
                         break;
                     default:
                         throw new UnsupportedOperationException("в настоящий момент такой эффект не поддерживается");
@@ -155,7 +139,7 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
         if (!isClicked) {
             resultOfActions.add("Герой выбрал... Бездействовать");
         }
-        stuntman.showResultOfAction(resultOfActions);
+        directorPresenter.showResultOfActions(resultOfActions);
         Log.d(LOG_TAG, "Dialog : onDismiss");
 
     }

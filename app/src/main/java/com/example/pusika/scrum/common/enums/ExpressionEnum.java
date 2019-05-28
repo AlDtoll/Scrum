@@ -5,10 +5,6 @@ package com.example.pusika.scrum.common.enums;
  */
 public enum ExpressionEnum {
     /**
-     * Неважно какое
-     */
-    ANY("any"),
-    /**
      * Строго меньше
      */
     LESS("less"),
@@ -25,7 +21,16 @@ public enum ExpressionEnum {
      * Значение условия, будет умножено на значение статуса {@link com.example.pusika.scrum.model.Status#value}, которое оно проверяет с сохранением знака.
      * Все "Функции" будут сложены между собой, чтобы определить вероятность применения эффекта.
      */
-    FUNCTION("function");
+    FUNCTION("function"),
+
+    /**
+     * Достаточно, чтобы было больше некоторого значения
+     */
+    ENOUGH_MORE("enoughMore"),
+    /**
+     * Достаточно, чтобы было меньше некоторого значения
+     */
+    ENOUGH_LESS("enoughLess");
     private String code;
 
     ExpressionEnum(String code) {

@@ -15,32 +15,29 @@ public class ConditionOf implements Serializable {
     /**
      * Имя проверяемого статуса. Если такой статус находится, то смотрится его значение в соответствии с выражением
      */
+    private String targetForCheck;
     private String statusName;
     private ExpressionEnum expression;
     private int value;
 
-    public ConditionOf() {
-    }
-
-    //todo переделать
-    public ConditionOf(ExpressionEnum expression) {
-        this(ExpressionEnum.ANY, "", 0);
-    }
-
-    public ConditionOf(ExpressionEnum expression, String statusName, int value) {
-        this.statusName = statusName;
-        this.expression = expression;
-        this.value = value;
-    }
-
-    public static boolean isCondition(ArrayList<ConditionOf> conditionsOfAction, ArrayList<Status> heroStatuses) {
+    public static boolean isCondition(ArrayList<ConditionOf> conditionsOfAction, ArrayList<Status> statuses) {
         if (conditionsOfAction.size() == 0) {
             return true;
         }
         int point = 0;
         for (ConditionOf conditionOf : conditionsOfAction) {
-            for (Status status : heroStatuses) {
+            for (Status status : statuses) {
                 if (status.getName().equalsIgnoreCase(conditionOf.getStatusName())) {
+                    if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_MORE)) {
+                        if (status.getValue() >= conditionOf.getValue()) {
+                            return true;
+                        }
+                    }
+                    if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_LESS)) {
+                        if (status.getValue() <= conditionOf.getValue()) {
+                            return true;
+                        }
+                    }
                     if (conditionOf.getExpression() == (ExpressionEnum.MORE)) {
                         if (status.getValue() <= conditionOf.getValue()) {
                             return false;
@@ -86,5 +83,13 @@ public class ConditionOf implements Serializable {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public String getTargetForCheck() {
+        return targetForCheck;
+    }
+
+    public void setTargetForCheck(String targetForCheck) {
+        this.targetForCheck = targetForCheck;
     }
 }

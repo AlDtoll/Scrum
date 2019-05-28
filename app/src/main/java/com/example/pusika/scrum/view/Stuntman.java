@@ -2,8 +2,6 @@ package com.example.pusika.scrum.view;
 
 import com.example.pusika.scrum.model.Status;
 
-import java.util.ArrayList;
-
 /**
  * Нужен, чтобы выполнять различные эффекты
  */
@@ -34,7 +32,5 @@ public interface Stuntman {
 
     void changeHeroStatus(Status status);
 
-    void showResultOfAction(ArrayList<String> results);
-
-    void startNewRound();
+    void changeEnemyStatus(Status status);
 }

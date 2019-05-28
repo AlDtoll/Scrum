@@ -17,18 +17,6 @@ public class ScrumAction implements Serializable {
     public ScrumAction() {
     }
 
-    public ScrumAction(int iconOfAction, String nameOfAction, String descriptionOfAction, ArrayList<EffectOfAction> effectsOfAction) {
-        this(iconOfAction, nameOfAction, descriptionOfAction, effectsOfAction, new ArrayList<>());
-    }
-
-    public ScrumAction(int iconOfAction, String nameOfAction, String descriptionOfAction, ArrayList<EffectOfAction> effectsOfAction, ArrayList<ConditionOf> conditionsOfAction) {
-        this.iconOfAction = iconOfAction;
-        this.nameOfAction = nameOfAction;
-        this.descriptionOfAction = descriptionOfAction;
-        this.effectsOfAction = effectsOfAction;
-        this.conditionsOfAction = conditionsOfAction;
-    }
-
     public int getIconOfAction() {
         return iconOfAction;
     }

@@ -2,7 +2,6 @@ package com.example.pusika.scrum.view;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
-import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -23,26 +22,11 @@ import android.widget.TextView;
 
 import com.example.pusika.scrum.R;
 import com.example.pusika.scrum.common.MyProgressBar;
-import com.example.pusika.scrum.common.enums.HpStateEnum;
-import com.example.pusika.scrum.model.Battle;
 import com.example.pusika.scrum.model.Cell;
-import com.example.pusika.scrum.model.Fighter;
-import com.example.pusika.scrum.model.Hero;
-import com.example.pusika.scrum.model.Place;
-import com.example.pusika.scrum.model.ScrumAction;
-import com.example.pusika.scrum.model.StatisticsCollector;
-import com.example.pusika.scrum.model.Status;
+import com.example.pusika.scrum.presenter.DirectorPresenter;
 import com.example.pusika.scrum.view.common.BitmapHexagonDrawable;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import static com.example.pusika.scrum.view.StartActivity.AUTO_ACTIONS;
-import static com.example.pusika.scrum.view.StartActivity.HERO_ACTIONS;
 
 //TODO разбить на MVP
 //TODO покрыть тестами
@@ -52,11 +36,8 @@ import static com.example.pusika.scrum.view.StartActivity.HERO_ACTIONS;
 //TODO снова покрыть тестами xD
 //TODO странная альбомная ориентация?
 
-public class MainActivity extends AppCompatActivity implements Stuntman {
+public class MainActivity extends AppCompatActivity implements Playground {
 
-    public final static String RESULT_OF_ROUND = "resultOfRound";
-    public final static String HERO_STATUSES = "hero_statuses";
-    public final static String RESULT_OF_ACTION = "resultOfAction";
     private final static long MAX_DRAWABLE_VALUE = 10000;
     private final static double ONE_PERCENT = MAX_DRAWABLE_VALUE / 100;
     /**
@@ -65,24 +46,11 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
     //todo это все тоже вынести в настройки читаемые снаружи
     private final static double ROUND_TIME_PROGRESS_BAR_MAX = 5000;
     private final static double TIME_PROGRESS_BAR_MAX = 2000;
-    private final static double POINT_IN_ONE_MILLISECONDS = MAX_DRAWABLE_VALUE / TIME_PROGRESS_BAR_MAX;
     private final static int ROWS = 7;
     private final static int COLS = 7;
-    private final static double TIME_OF_ANIMATION = 200;
     final String TAG = "Log";
-    boolean isAttack = true;
-    boolean isTheEndOfRound = false;
-    boolean isPause = true;
-    int idOfActiveCell;
     int sizeOfCellArray = 0;
-    int idOfClickedCell;
-    Hero hero;
-    Fighter enemy;
-    Battle battle;
-    int timeAfterAttack;
-    int timeAfterDefence;
-    int timeAfterGetHit;
-    int threshold;
+
     /**
      * Блок с вьюхами
      */
@@ -99,76 +67,53 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
     TextView antagonistHpTextView;
     ImageView iconOfEnemy;
     View.OnClickListener onClickListener;
+    DirectorPresenter directorPresenter = new DirectorPresenter();
     /**
      * Блок с полями для отображения
      */
-    private Timer timer = new Timer();
-    private String baseEnemyIcon;
-    private double pointInOneHpPoint;
-    private int animationValue = 0;
-    private int previousHeroHp = 0;
-    private int previousEnemyHp = 0;
+    private String baseEnemyIconName;
+
     /**
      * Блок с полями для битвы
      */
     private Cell[] cells = new Cell[ROWS * COLS];
-    private Place place;
-    private ArrayList<ScrumAction> scrumHeroActions = new ArrayList<>();
-    private ArrayList<ScrumAction> scrumAutoActions = new ArrayList<>();
-    /**
-     * Блок для сбора статистики
-     */
-    private StatisticsCollector statisticsCollector = new StatisticsCollector();
-    private double timeOfReaction = 0;
+    private String baseHeroIconName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //todo состряпать билдер?
-        findComponentsById();
-        createBattle();
-        createListeners();
-        initField();
-        startFight();
+        directorPresenter.attachView(this);
+        directorPresenter.attachContext(MainActivity.this);
+        directorPresenter.createListeners();
+        directorPresenter.prepareScene();
+        directorPresenter.prepareActors();
+        directorPresenter.motor();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "MainActivity: onStop(). isPause " + isPause);
-        isPause = true;
+        Log.d(TAG, "MainActivity: onStop()");
+        directorPresenter.stop();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "MainActivity: onPause(). isPause " + isPause);
-        isPause = true;
+        Log.d(TAG, "MainActivity: onPause()");
+        directorPresenter.stop();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "MainActivity: onResume(). isPause " + isPause);
-        createStartBattleDialog();
+        Log.d(TAG, "MainActivity: onResume(). isPause ");
+        directorPresenter.createStartBattleDialog();
     }
 
-    private void createStartBattleDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        StringBuilder message = new StringBuilder();
-        message.append(hero.getName())
-                .append(" против ")
-                .append(enemy.getName());
-        builder
-                .setTitle("БОЙ!")
-                .setMessage(message.toString())
-                .setPositiveButton("Ok", (dialog, which) -> isPause = false)
-                .create();
-        builder.show();
-    }
-
-    private void findComponentsById() {
+    @Override
+    public void findDecor() {
         field = findViewById(R.id.field);
         scale = findViewById(R.id.scale);
         timeProgressBar = findViewById(R.id.timeProgressBar);
@@ -185,39 +130,17 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
         iconOfEnemy = findViewById(R.id.iconOfEnemy);
     }
 
-    private void createBattle() {
-        Bundle arguments = getIntent().getExtras();
-        place = (Place) arguments.get("place");
-        hero = (Hero) arguments.get("hero");
-        enemy = (Fighter) arguments.get("enemy");
+    @Override
+    public void createPoster(Bundle actors) {
+        iconOfHero.setImageResource(directorPresenter.getScene().getHero().getIcon());
+        iconOfEnemy.setImageResource(directorPresenter.getScene().getEnemy().getIcon());
 
-        //todo убрать
-        scrumHeroActions = (ArrayList<ScrumAction>) arguments.get(HERO_ACTIONS);
-        scrumAutoActions = (ArrayList<ScrumAction>) arguments.get(AUTO_ACTIONS);
-
-        battle = new Battle(hero, enemy);
-        iconOfHero.setImageResource(hero.getIcon());
-        iconOfEnemy.setImageResource(enemy.getIcon());
-        baseEnemyIcon = getResources().getResourceEntryName(enemy.getIcon());
-
-        timeAfterAttack = hero.getTimeAfterAttack();
-        timeAfterDefence = hero.getTimeAfterDefence();
-        timeAfterGetHit = hero.getTimeAfterGetHit();
-        threshold = hero.getThreshold();
-
-        pointInOneHpPoint = MAX_DRAWABLE_VALUE / hero.getMaxHp();
-        //todo настраиваемое значение?
-        timeProgressBar.setProgress(ONE_PERCENT * 100);
-        protagonistHpProgressBar.setProgress(hero.getHp() * pointInOneHpPoint);
-        antagonistHpProgressBar.setProgress(enemy.getHp() * pointInOneHpPoint);
-
+        baseHeroIconName = getResources().getResourceEntryName(directorPresenter.getScene().getHero().getIcon());
+        baseEnemyIconName = getResources().getResourceEntryName(directorPresenter.getScene().getEnemy().getIcon());
     }
 
-    private void createListeners() {
-        onClickListener = view -> {
-            clearButton(view);
-            doAction(view);
-        };
+    public void createListeners() {
+        onClickListener = view -> directorPresenter.onClick(view);
     }
 
     /**
@@ -226,82 +149,32 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
      * @param view кнопка паузы
      */
     public void pause(View view) {
-        isPause = !isPause;
-    }
-
-    private void clearButton(View view) {
-        ImageView imageButton = findViewById(view.getId());
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.none);
-        Drawable dr = new BitmapHexagonDrawable(bitmap);
-        imageButton.setImageDrawable(dr);
-    }
-
-    private void doAction(View v) {
-        executeAnimationOfClick(v);
-        takeStatistic();
-        shakeWeapon(v);
-
-    }
-
-    private void takeStatistic() {
-        //todo тут собираем статистику по раунду
-        statisticsCollector.takeTimeOfReaction(timeOfReaction);
-        timeOfReaction = 0;
-    }
-
-    private void executeAnimationOfClick(View view) {
-        idOfClickedCell = view.getId();
-
-        ImageView clickedButton = (ImageView) view;
-        Bitmap bitmap;
-        if (view.getId() == idOfActiveCell) {
-            if (isAttack) {
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.greensword);
-            } else {
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.greenshield);
-            }
-            Drawable dr = new BitmapHexagonDrawable(bitmap);
-            clickedButton.setImageDrawable(dr);
+        if (directorPresenter.isPause()) {
+            directorPresenter.play();
         } else {
-            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.red);
-            Drawable dr = new BitmapHexagonDrawable(bitmap);
-            clickedButton.setImageDrawable(dr);
+            directorPresenter.stop();
         }
-        animationValue = (int) TIME_OF_ANIMATION;
     }
 
-    private void shakeWeapon(View view) {
-        double currentTimeProgressBarValue = timeProgressBar.getProgress();
-        int numberOfCell = view.getId();
-        Cell cell = cells[numberOfCell];
-        switch (cell.getIcon()) {
-            case Cell.NONE:
-                makeMiss();
-                break;
-            case Cell.SWORD_OR_SHIElD:
-                if (isAttack) {
-                    battle.strike(hero.getDmg());
-                    timeProgressBar.setProgress(currentTimeProgressBarValue + timeAfterAttack * POINT_IN_ONE_MILLISECONDS);
-                } else {
-                    battle.block();
-                    timeProgressBar.setProgress(currentTimeProgressBarValue + timeAfterDefence * POINT_IN_ONE_MILLISECONDS);
-                }
-                cell.setIcon(Cell.NONE);
-                changeIconPlace();
-                break;
-            default:
-                break;
-        }
-        if (isTheEndOfRound) {
-            finishRound();
-        }
+    @Override
+    public void setImageToButton(View view, int resource) {
+        ImageView button = (ImageView) view;
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resource);
+        Drawable dr = new BitmapHexagonDrawable(bitmap);
+        button.setImageDrawable(dr);
+    }
+
+    @Override
+    public View findCell(int idOfCell) {
+        return findViewById(idOfCell);
     }
 
     /**
      * Метод, который создает игровое поле
      */
     //todo буэээ, заменить на что-то потребное
-    private void initField() {
+    @Override
+    public void placeDecor() {
         ConstraintLayout constraintLayout = new ConstraintLayout(this);
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT);
 
@@ -328,9 +201,7 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
                 sizeOfCellArray++;
                 cellWasInRow++;
                 ImageView button = new ImageView(this);
-                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.none);
-                Drawable dr = new BitmapHexagonDrawable(bitmap);
-                button.setImageDrawable(dr);
+                setImageToButton(button, R.drawable.none);
                 button.setId(counter);
                 button.setOnClickListener(onClickListener);
                 counter++;
@@ -352,169 +223,77 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
         field.addView(constraintLayout, layoutParams);
     }
 
-    private void finishRound() {
-        TimeoutDialog timeoutDialog = new TimeoutDialog();
-        Bundle args = new Bundle();
-        args.putSerializable(HERO_STATUSES, hero.getStatuses());
-        //todo убрать после прямого прокидывания
-        args.putSerializable(HERO_ACTIONS, scrumHeroActions);
-        args.putSerializable(AUTO_ACTIONS, scrumAutoActions);
-        createResultOfRound(args);
+    @Override
+    public void changeFrame() {
+        double currentRoundTimeProgressBarValue = roundTimeProgressBar.getProgress();
+        roundTimeProgressBar.setProgress(currentRoundTimeProgressBarValue + ONE_PERCENT);
+        String currentRoundTime = new DecimalFormat("#0.00 с").format(currentRoundTimeProgressBarValue / MAX_DRAWABLE_VALUE * ROUND_TIME_PROGRESS_BAR_MAX / 1000.0);
+        roundTimeTextView.setText(currentRoundTime);
 
-        timeoutDialog.setArguments(args);
-        timeoutDialog.show(getFragmentManager(), "timeoutDialog");
-        isPause = true;
+        double currentTimeProgressBarValue = timeProgressBar.getProgress();
+        timeProgressBar.setProgress(currentTimeProgressBarValue - ONE_PERCENT * ROUND_TIME_PROGRESS_BAR_MAX / TIME_PROGRESS_BAR_MAX);
+        String currentTime = new DecimalFormat("#0.00 с").format(currentTimeProgressBarValue / MAX_DRAWABLE_VALUE * TIME_PROGRESS_BAR_MAX / 1000.0);
+        timeTextView.setText(currentTime);
+
     }
 
-    private void createResultOfRound(Bundle args) {
-        //todo нужно ли это все здесь? или только в конце?
-        StringBuilder message = new StringBuilder();
-        message.append("За раунд герой нанес ").append(battle.getHits()).append(" ударов, ")
-                .append("\n")
-                .append("промахнулся ").append(battle.getMisses()).append(" раз")
-                .append("\n")
-                .append("заблокировал ").append(battle.getBlocks()).append(" ударов")
-                .append("\n")
-                .append(" и получил ").append(battle.getCuts()).append(".")
-                .append("\n")
-                .append("Похоже, что противник ").append(checkFighterHp(enemy).getCode());
-
-        args.putString(RESULT_OF_ROUND, String.valueOf(message));
+    @Override
+    public double getTimeProgressBarValue() {
+        return timeProgressBar.getProgress();
     }
 
-    private HpStateEnum checkFighterHp(Fighter fighter) {
-        if (fighter.getHp() == fighter.getMaxHp()) {
-            return HpStateEnum.HEALTHY;
-        }
-        if (fighter.getHp() == fighter.getMaxHp() - 1) {
-            return HpStateEnum.SCRATCH;
-        }
-        if (fighter.getHp() >= fighter.getMaxHp() / 2) {
-            return HpStateEnum.CUT;
-        }
-        if (fighter.getHp() < fighter.getMaxHp() / 2 && fighter.getHp() != 0) {
-            return HpStateEnum.BAD;
-        }
-        return HpStateEnum.DEAD;
+    @Override
+    public void setTimeProgressBarValue(double value) {
+        timeProgressBar.setProgress(value);
     }
 
-    private void makeMiss() {
-        // todo какой эффект для боя. changeIconPlace() например
-        battle.miss();
+    @Override
+    public double getRoundTimeProgressBarValue() {
+        return roundTimeProgressBar.getProgress();
     }
 
-    private void startFight() {
-        changeIconPlace();
-        final ImageView[] imageButton = new ImageView[1];
-        final ImageView[] clickedButton = new ImageView[1];
-        final double[] currentRoundTimeProgressBarValue = new double[1];
-        final String[] currentRoundTime = new String[1];
-        final double[] currentTimeProgressBarValue = new double[1];
-        final String[] currentTime = new String[1];
-        final String[] currentHeroLife = new String[1];
-        final Bitmap[] bitmap = new Bitmap[1];
-        TimerTask timerTask = new TimerTask() {
-
-            @Override
-            public void run() {
-                runOnUiThread(() -> {
-                    if (!isPause) {
-                        currentRoundTimeProgressBarValue[0] = roundTimeProgressBar.getProgress();
-                        roundTimeProgressBar.setProgress(currentRoundTimeProgressBarValue[0] + ONE_PERCENT);
-                        currentRoundTime[0] = new DecimalFormat("#0.00 с").format(currentRoundTimeProgressBarValue[0] / MAX_DRAWABLE_VALUE * ROUND_TIME_PROGRESS_BAR_MAX / 1000.0);
-                        roundTimeTextView.setText(currentRoundTime[0]);
-
-                        if (roundTimeProgressBar.getProgress() == MAX_DRAWABLE_VALUE) {
-                            isTheEndOfRound = true;
-                            if (timeProgressBar.getProgress() == 0) {
-                                finishRound();
-                            }
-                        }
-                        currentTimeProgressBarValue[0] = timeProgressBar.getProgress();
-                        timeProgressBar.setProgress(currentTimeProgressBarValue[0] - ONE_PERCENT * ROUND_TIME_PROGRESS_BAR_MAX / TIME_PROGRESS_BAR_MAX);
-                        currentTime[0] = new DecimalFormat("#0.00 с").format(currentTimeProgressBarValue[0] / MAX_DRAWABLE_VALUE * TIME_PROGRESS_BAR_MAX / 1000.0);
-                        timeTextView.setText(currentTime[0]);
-
-                        if (currentTimeProgressBarValue[0] == 0) {
-                            battle.getHit(enemy.getDmg());
-
-                            timeProgressBar.setProgress(currentTimeProgressBarValue[0] + timeAfterGetHit * POINT_IN_ONE_MILLISECONDS);
-                        }
-
-
-                        if (currentTimeProgressBarValue[0] <= threshold * POINT_IN_ONE_MILLISECONDS) {
-                            isAttack = false;
-                        } else {
-                            isAttack = true;
-                        }
-
-                        if (isAttack) {
-                            bitmap[0] = BitmapFactory.decodeResource(getResources(), R.drawable.sword);
-                        } else {
-                            bitmap[0] = BitmapFactory.decodeResource(getResources(), R.drawable.shield);
-                        }
-                        Drawable dr = new BitmapHexagonDrawable(bitmap[0]);
-                        imageButton[0] = findViewById(idOfActiveCell);
-                        imageButton[0].setImageDrawable(dr);
-
-                        if (animationValue == 0) {
-                            if (idOfClickedCell < sizeOfCellArray) {
-                                clickedButton[0] = findViewById(idOfClickedCell);
-                                clearButton(clickedButton[0]);
-                            }
-                            idOfClickedCell = sizeOfCellArray + 1;
-                            field.setBackgroundColor(Color.WHITE);
-                        }
-                        animationValue = animationValue - 100;
-
-                        protagonistHpProgressBar.setProgress(battle.getHeroHp() * pointInOneHpPoint);
-                        currentHeroLife[0] = battle.getHeroHp() + " / " + hero.getMaxHp();
-                        protagonistHpTextView.setText(currentHeroLife[0]);
-                        antagonistHpProgressBar.setProgress(battle.getEnemyHp() * pointInOneHpPoint);
-
-                        if (protagonistHpProgressBar.getProgress() == 0) {
-                            defeat();
-                        }
-
-                        if (antagonistHpProgressBar.getProgress() == 0) {
-                            victory();
-                        }
-                        makeBlinks();
-
-                        timeOfReaction++;
-                    }
-                });
-            }
-        };
-
-        timer.schedule(timerTask, 0, (long) ROUND_TIME_PROGRESS_BAR_MAX / 100);
+    @Override
+    public void setRoundTimeProgressBarValue(double value) {
+        roundTimeProgressBar.setProgress(value);
     }
 
-    private void changeIconPlace() {
-        Random random = new Random(new Date().getTime());
-        int numberOfCell = random.nextInt(sizeOfCellArray - 1);
-        Log.d(TAG, numberOfCell + "клетка");
-        idOfActiveCell = numberOfCell;
-        cells[numberOfCell].setIcon(Cell.SWORD_OR_SHIElD);
-        clearButton(findViewById(numberOfCell));
+    @Override
+    public void setProtagonistHpTextView(String Hp) {
+        protagonistHpTextView.setText(Hp);
     }
 
-    private void makeBlinks() {
-        if (previousHeroHp != battle.getHeroHp()) {
-            makeAnimationOfChangedView(protagonistHpProgressBar, previousHeroHp > battle.getHeroHp() ? Color.RED : Color.GREEN);
-
-            changeFighterIcon(hero);
-        }
-        previousHeroHp = battle.getHeroHp();
-        if (previousEnemyHp != battle.getEnemyHp()) {
-            makeAnimationOfChangedView(antagonistHpProgressBar, previousEnemyHp > battle.getEnemyHp() ? Color.RED : Color.GREEN);
-
-            changeFighterIcon(enemy);
-        }
-        previousEnemyHp = battle.getEnemyHp();
+    @Override
+    public double getProtagonistHpProgressBarValue() {
+        return protagonistHpProgressBar.getProgress();
     }
 
-    private void makeAnimationOfChangedView(View view, int color) {
+    @Override
+    public void setProtagonistHpProgressBarValue(double value) {
+        protagonistHpProgressBar.setProgress(value);
+    }
+
+    @Override
+    public double getAntagonistHpProgressBarValue() {
+        return antagonistHpProgressBar.getProgress();
+    }
+
+    @Override
+    public void setAntagonistHpProgressBarValue(double value) {
+        antagonistHpProgressBar.setProgress(value);
+    }
+
+    @Override
+    public int getSizeOfCellArray() {
+        return sizeOfCellArray;
+    }
+
+    @Override
+    public Cell[] getCells() {
+        return cells;
+    }
+
+    @Override
+    public void makeAnimationOfChangedView(View view, int color) {
         //todo механизм видимости шкалы в зависимости от настроек битвы
         if (view.getVisibility() != View.INVISIBLE) {
             view.startAnimation(AnimationUtils.loadAnimation(this, R.anim.vibrate));
@@ -528,146 +307,28 @@ public class MainActivity extends AppCompatActivity implements Stuntman {
         backgroundColorAnimator.start();
     }
 
-    private void changeFighterIcon(Fighter fighter) {
-        if (fighter.getName().equals(hero.getName())) {
-            switch (checkFighterHp(hero)) {
-                case HEALTHY:
-                    iconOfHero.setImageResource(getBaseContext().getResources().getIdentifier("hero", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case CUT:
-                    iconOfHero.setImageResource(getBaseContext().getResources().getIdentifier("hero_cut", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case SCRATCH:
-                    iconOfHero.setImageResource(getBaseContext().getResources().getIdentifier("hero_scratch", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case BAD:
-                    iconOfHero.setImageResource(getBaseContext().getResources().getIdentifier("hero_bad", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case DEAD:
-                    iconOfHero.setImageResource(getBaseContext().getResources().getIdentifier("grave", "drawable", getBaseContext().getPackageName()));
-                    break;
-            }
-        } else {
-            switch (checkFighterHp(enemy)) {
-                case HEALTHY:
-                    iconOfEnemy.setImageResource(getBaseContext().getResources().getIdentifier(baseEnemyIcon, "drawable", getBaseContext().getPackageName()));
-                    break;
-                case CUT:
-                    iconOfEnemy.setImageResource(getBaseContext().getResources().getIdentifier(baseEnemyIcon + "_cut", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case SCRATCH:
-                    iconOfEnemy.setImageResource(getBaseContext().getResources().getIdentifier(baseEnemyIcon + "_scratch", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case BAD:
-                    iconOfEnemy.setImageResource(getBaseContext().getResources().getIdentifier(baseEnemyIcon + "_bad", "drawable", getBaseContext().getPackageName()));
-                    break;
-                case DEAD:
-                    iconOfEnemy.setImageResource(getBaseContext().getResources().getIdentifier("grave", "drawable", getBaseContext().getPackageName()));
-                    break;
-            }
-        }
-    }
-
-    private void victory() {
-
-    }
-
-    private void defeat() {
-        //todo пораженние либо побег
-    }
-
-    //todo дефолтное поведение
     @Override
-    public void changeHeroHp(int value) {
-        battle.setHeroHp(battle.getHeroHp() + value);
+    public void setIcon(ImageView imageView, String iconName) {
+        imageView.setImageResource(getBaseContext().getResources().getIdentifier(iconName, "drawable", getBaseContext().getPackageName()));
     }
 
     @Override
-    public void changeEnemyHp(int value) {
-        battle.setEnemyHp(battle.getEnemyHp() + value);
+    public ImageView getHeroIcon() {
+        return iconOfHero;
     }
 
     @Override
-    public void changeTime(int value) {
-
+    public ImageView getEnemyIcon() {
+        return iconOfEnemy;
     }
 
     @Override
-    public void changeRoundTime(int value) {
-
+    public String getBaseHeroIconName() {
+        return baseHeroIconName;
     }
 
     @Override
-    public void setHeroHp(int value) {
-
-    }
-
-    @Override
-    public void setEnemyHp(int value) {
-
-    }
-
-    @Override
-    public void setTime(int value) {
-
-    }
-
-    @Override
-    public void setRoundTime(int value) {
-
-    }
-
-    @Override
-    public void setThreshold(int value) {
-
-    }
-
-    @Override
-    public void changeThreshold(int value) {
-
-    }
-
-    @Override
-    public void changeHeroStatus(Status statusForChange) {
-        boolean isChanged = false;
-        ArrayList<Status> statuses = hero.getStatuses();
-        for (Status status : statuses) {
-            if (status.getName().equals(statusForChange.getName())) {
-                status.setValue(status.getValue() + statusForChange.getValue());
-                isChanged = true;
-            }
-        }
-        if (!isChanged) {
-            statuses.add(statusForChange);
-        }
-    }
-
-    @Override
-    public void showResultOfAction(ArrayList<String> results) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        StringBuilder message = new StringBuilder();
-        for (String result : results) {
-            message
-                    .append(result)
-                    .append("\n");
-        }
-        builder
-                .setTitle("В результате...")
-                .setMessage(message.toString())
-                .setPositiveButton("Ok", (dialog, which) -> {
-                    isPause = false;
-                    startNewRound();
-                })
-                //todo на отмену действие
-                .create();
-        builder.show();
-    }
-
-    @Override
-    public void startNewRound() {
-        roundTimeProgressBar.setProgress(0);
-        timeProgressBar.setProgress(MAX_DRAWABLE_VALUE / 2);
-        isTheEndOfRound = false;
-        battle.startRound();
+    public String getBaseEnemyIconName() {
+        return baseEnemyIconName;
     }
 }

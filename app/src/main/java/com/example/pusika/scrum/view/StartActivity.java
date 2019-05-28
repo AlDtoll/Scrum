@@ -132,7 +132,7 @@ public class StartActivity extends AppCompatActivity {
         intent.putExtra(PLACE, place);
         intent.putExtra(HERO, hero);
         intent.putExtra(ENEMY, enemy);
-        //todo перкидывать сервисом или бродкастом в диалог
+//        //todo перкидывать сервисом или бродкастом в диалог
         intent.putExtra(HERO_ACTIONS, scrumHeroActions);
         intent.putExtra(AUTO_ACTIONS, scrumAutoActions);
         startActivity(intent);

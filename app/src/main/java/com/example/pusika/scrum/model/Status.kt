@@ -22,4 +22,13 @@ class Status : Serializable {
         this.description = description
         this.isVisible = isVisible
     }
+
+    override fun toString(): String {
+//        if (!isVisible) {
+//            return ""
+//        }
+        return "$description: $value"
+    }
+
+
 }
