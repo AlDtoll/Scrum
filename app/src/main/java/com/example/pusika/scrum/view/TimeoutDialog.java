@@ -14,7 +14,9 @@ import android.widget.TextView;
 import com.example.pusika.scrum.R;
 import com.example.pusika.scrum.model.ConditionOf;
 import com.example.pusika.scrum.model.EffectOfAction;
+import com.example.pusika.scrum.model.Scene;
 import com.example.pusika.scrum.model.ScrumAction;
+import com.example.pusika.scrum.model.Status;
 import com.example.pusika.scrum.presenter.DirectorPresenter;
 
 import java.util.ArrayList;
@@ -76,7 +78,7 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
             timeoutDialogActionButtonDescription.setText(scrumAction.getDescriptionOfAction());
             timeoutDialogActionButton.setId(i);
             timeoutDialogActionButton.setOnClickListener(this);
-            if (ConditionOf.isCondition(scrumAction.getConditionsOfAction(), directorPresenter.getScene().getHero().getStatuses())) {
+            if (ConditionOf.isCondition(scrumAction.getConditionsOfAction(), directorPresenter.getScene())) {
                 listOfAction.addView(timeoutDialogActionButton);
             }
             i++;
@@ -106,22 +108,32 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
 
     private void executeAction(ArrayList<EffectOfAction> effectsOfAction) {
         for (EffectOfAction effectOfAction : effectsOfAction) {
-            if (ConditionOf.isCondition(effectOfAction.getConditionsOfEffect(), directorPresenter.getScene().getHero().getStatuses())) {
+            if (ConditionOf.isCondition(effectOfAction.getConditionsOfEffect(), directorPresenter.getScene())) {
+                int value;
+                String effectOfActionValue = effectOfAction.getValue();
+                if (isNumeric(effectOfActionValue)) {
+                    value = Integer.parseInt(effectOfAction.getValue());
+                } else {
+                    value = findValue(effectOfActionValue, directorPresenter.getScene());
+                }
                 switch (effectOfAction.getEffect()) {
                     case CHANGE_HERO_HP:
-                        directorPresenter.changeHeroHp(effectOfAction.getValue());
+                        directorPresenter.changeHeroHp(value);
                         break;
                     case CHANGE_HERO_STATUS:
-                        directorPresenter.changeHeroStatus(effectOfAction.getStatus());
+                        directorPresenter.changeHeroStatus(effectOfAction.getStatus(), value);
+                        break;
+                    case CHANGE_ENEMY_STATUS:
+                        directorPresenter.changeEnemyStatus(effectOfAction.getStatus(), value);
                         break;
                     case CHANGE_ENEMY_HP:
-                        directorPresenter.changeEnemyHp(effectOfAction.getValue());
+                        directorPresenter.changeEnemyHp(value);
                         break;
                     case CHANGE_TIME:
-                        directorPresenter.changeTime(effectOfAction.getValue());
+                        directorPresenter.changeTime(value);
                         break;
                     case CHANGE_ROUND_TIME:
-                        directorPresenter.changeRoundTime(effectOfAction.getValue());
+                        directorPresenter.changeRoundTime(value);
                         break;
                     default:
                         throw new UnsupportedOperationException("в настоящий момент такой эффект не поддерживается");
@@ -131,6 +143,17 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
                 resultOfActions.add(effectOfAction.getFail());
             }
         }
+    }
+
+    private int findValue(String effectOfActionValue, Scene scene) {
+        //todo заменить на конкретную проверку
+        ArrayList<Status> statuses = scene.getHero().getStatuses();
+        for (Status status : statuses) {
+            if (status.getName().equals(effectOfActionValue)) {
+                return status.getValue();
+            }
+        }
+        return 0;
     }
 
     public void onDismiss(DialogInterface dialog) {
@@ -148,5 +171,9 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
         //todo предупреждение
         super.onCancel(dialog);
         Log.d(LOG_TAG, "Dialog : onCancel");
+    }
+
+    private boolean isNumeric(String string) {
+        return string.matches("\\d+");
     }
 }

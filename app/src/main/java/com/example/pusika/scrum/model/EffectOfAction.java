@@ -24,7 +24,7 @@ public class EffectOfAction implements Serializable {
      * Для статуса:
      * Если такого статуса нет, то его значение считается за 0
      */
-    private int value;
+    private String value;
     /**
      * Условия {@link ConditionOf} примения эффекта
      */
@@ -43,32 +43,6 @@ public class EffectOfAction implements Serializable {
     public EffectOfAction() {
     }
 
-    public EffectOfAction(EffectEnum effect, int value) {
-        this(effect, null, value, new ArrayList<>());
-    }
-
-    public EffectOfAction(EffectEnum effect, Status status, int value, ArrayList<ConditionOf> conditionsOfEffect) {
-        this.effect = effect;
-        this.value = value;
-        this.status = status;
-        this.conditionsOfEffect = conditionsOfEffect;
-    }
-
-    public EffectOfAction(EffectEnum effect, Status status, int value, ArrayList<ConditionOf> conditionsOfEffect, String success, String fail) {
-        this.effect = effect;
-        this.value = value;
-        this.status = status;
-        this.conditionsOfEffect = conditionsOfEffect;
-        this.success = success;
-        this.fail = fail;
-    }
-
-    public EffectOfAction(EffectEnum effect, Status status, String description) {
-        this.effect = effect;
-        this.status = status;
-        this.success = description;
-    }
-
     public EffectEnum getEffect() {
         return effect;
     }
@@ -77,11 +51,11 @@ public class EffectOfAction implements Serializable {
         this.effect = effect;
     }
 
-    public int getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

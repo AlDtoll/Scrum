@@ -1,6 +1,7 @@
 package com.example.pusika.scrum.model;
 
 import com.example.pusika.scrum.common.enums.ExpressionEnum;
+import com.example.pusika.scrum.common.enums.TargetEnum;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,41 +16,57 @@ public class ConditionOf implements Serializable {
     /**
      * Имя проверяемого статуса. Если такой статус находится, то смотрится его значение в соответствии с выражением
      */
-    private String targetForCheck;
+    private TargetEnum targetForCheck;
     private String statusName;
     private ExpressionEnum expression;
-    private int value;
+    private String value;
 
-    public static boolean isCondition(ArrayList<ConditionOf> conditionsOfAction, ArrayList<Status> statuses) {
-        if (conditionsOfAction.size() == 0) {
+    public static boolean isCondition(ArrayList<ConditionOf> conditionOfs, Scene scene) {
+        if (conditionOfs.size() == 0) {
             return true;
         }
         int point = 0;
-        for (ConditionOf conditionOf : conditionsOfAction) {
+        for (ConditionOf conditionOf : conditionOfs) {
+            ArrayList<Status> statuses;
+            if (conditionOf.getTargetForCheck() == TargetEnum.ENEMY) {
+                statuses = scene.getEnemy().getStatuses();
+            } else if (conditionOf.getTargetForCheck() == TargetEnum.PLACE) {
+                statuses = scene.getPlace().getStatuses();
+            } else {
+                statuses = scene.getHero().getStatuses();
+            }
             for (Status status : statuses) {
                 if (status.getName().equalsIgnoreCase(conditionOf.getStatusName())) {
+                    int statusValue = status.getValue();
+                    int value;
+                    String conditionOfValue = conditionOf.getValue();
+                    if (isNumeric(conditionOfValue)) {
+                        value = Integer.parseInt(conditionOfValue);
+                    } else {
+                        value = findValue(conditionOfValue, scene);
+                    }
                     if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_MORE)) {
-                        if (status.getValue() >= conditionOf.getValue()) {
+                        if (statusValue >= value) {
                             return true;
                         }
                     }
                     if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_LESS)) {
-                        if (status.getValue() <= conditionOf.getValue()) {
+                        if (statusValue <= value) {
                             return true;
                         }
                     }
                     if (conditionOf.getExpression() == (ExpressionEnum.MORE)) {
-                        if (status.getValue() <= conditionOf.getValue()) {
+                        if (statusValue <= value) {
                             return false;
                         }
                     }
                     if (conditionOf.getExpression() == (ExpressionEnum.LESS)) {
-                        if (status.getValue() >= conditionOf.getValue()) {
+                        if (statusValue >= value) {
                             return false;
                         }
                     }
                     if (conditionOf.getExpression() == ExpressionEnum.FUNCTION) {
-                        point += status.getValue() * conditionOf.getValue();
+                        point += statusValue * value;
                     } else {
                         return true;
                     }
@@ -77,19 +94,34 @@ public class ConditionOf implements Serializable {
         this.expression = expression;
     }
 
-    public int getValue() {
+    private static boolean isNumeric(String string) {
+        return string.matches("\\d+");
+    }
+
+    private static int findValue(String effectOfActionValue, Scene scene) {
+        //todo заменить на конкретную проверку
+        ArrayList<Status> statuses = scene.getHero().getStatuses();
+        for (Status status : statuses) {
+            if (status.getName().equals(effectOfActionValue)) {
+                return status.getValue();
+            }
+        }
+        return 0;
+    }
+
+    public String getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    public String getTargetForCheck() {
+    public TargetEnum getTargetForCheck() {
         return targetForCheck;
     }
 
-    public void setTargetForCheck(String targetForCheck) {
+    public void setTargetForCheck(TargetEnum targetForCheck) {
         this.targetForCheck = targetForCheck;
     }
 }

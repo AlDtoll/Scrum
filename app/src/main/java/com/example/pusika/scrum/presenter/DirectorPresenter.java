@@ -426,31 +426,33 @@ public class DirectorPresenter implements Stuntman, Serializable {
     }
 
     @Override
-    public void changeHeroStatus(Status statusForChange) {
+    public void changeHeroStatus(Status statusForChange, int value) {
         boolean isChanged = false;
         ArrayList<Status> statuses = getScene().getHero().getStatuses();
         for (Status status : statuses) {
             if (status.getName().equals(statusForChange.getName())) {
-                status.setValue(status.getValue() + statusForChange.getValue());
+                status.setValue(status.getValue() + value);
                 isChanged = true;
             }
         }
         if (!isChanged) {
+            statusForChange.setValue(value);
             statuses.add(statusForChange);
         }
     }
 
     @Override
-    public void changeEnemyStatus(Status statusForChange) {
+    public void changeEnemyStatus(Status statusForChange, int value) {
         boolean isChanged = false;
         ArrayList<Status> statuses = getScene().getEnemy().getStatuses();
         for (Status status : statuses) {
             if (status.getName().equals(statusForChange.getName())) {
-                status.setValue(status.getValue() + statusForChange.getValue());
+                status.setValue(status.getValue() + value);
                 isChanged = true;
             }
         }
         if (!isChanged) {
+            statusForChange.setValue(value);
             statuses.add(statusForChange);
         }
     }

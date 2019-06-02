@@ -30,7 +30,7 @@ public interface Stuntman {
 
     void changeThreshold(int value);
 
-    void changeHeroStatus(Status status);
+    void changeHeroStatus(Status statusForChange, int value);
 
-    void changeEnemyStatus(Status status);
+    void changeEnemyStatus(Status statusForChange, int value);
 }

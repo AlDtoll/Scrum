@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.pusika.scrum.common.enums.EffectEnum;
 import com.example.pusika.scrum.common.enums.ExpressionEnum;
+import com.example.pusika.scrum.common.enums.TargetEnum;
 import com.example.pusika.scrum.model.ConditionOf;
 import com.example.pusika.scrum.model.EffectOfAction;
 import com.example.pusika.scrum.model.ScrumAction;
@@ -73,10 +74,12 @@ public class ScrumActionResourseParser {
                         if (inConditions) {
                             if ("ScrumExpression".equalsIgnoreCase(tagName)) {
                                 conditionOf.setExpression(ExpressionEnum.of(textValue));
+                            } else if ("ScrumTarget".equalsIgnoreCase(tagName)) {
+                                conditionOf.setTargetForCheck(TargetEnum.of(textValue));
                             } else if ("ScrumStatusName".equalsIgnoreCase(tagName)) {
                                 conditionOf.setStatusName(textValue);
                             } else if ("ScrumValue".equalsIgnoreCase(tagName)) {
-                                conditionOf.setValue(Integer.valueOf(textValue));
+                                conditionOf.setValue(textValue);
                             } else if ("ScrumCondition".equalsIgnoreCase(tagName)) {
                                 conditionsOf.add(conditionOf);
                             } else if ("ScrumConditions".equalsIgnoreCase(tagName)) {
@@ -100,7 +103,7 @@ public class ScrumActionResourseParser {
                             if ("ScrumEnum".equalsIgnoreCase(tagName)) {
                                 effectOfAction.setEffect(EffectEnum.of(textValue));
                             } else if ("ScrumValue".equalsIgnoreCase(tagName)) {
-                                effectOfAction.setValue(Integer.valueOf(textValue));
+                                effectOfAction.setValue(textValue);
                             } else if ("ScrumStatus".equalsIgnoreCase(tagName)) {
                                 effectOfAction.setStatus(status);
                             } else if ("ScrumSuccess".equalsIgnoreCase(tagName)) {

@@ -13,6 +13,10 @@ public enum EffectEnum {
      */
     CHANGE_HERO_STATUS("changeHeroStatus"),
     /**
+     * Изменить (добавить) статус врага
+     */
+    CHANGE_ENEMY_STATUS("changeEnemyStatus"),
+    /**
      * Изменить значение Hp противника
      */
     CHANGE_ENEMY_HP("changeEnemyHp"),
