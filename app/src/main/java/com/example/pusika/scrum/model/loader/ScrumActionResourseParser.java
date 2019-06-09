@@ -48,13 +48,14 @@ public class ScrumActionResourseParser {
                 String tagName = xpp.getName();
                 switch (eventType) {
                     case XmlPullParser.START_TAG:
-                        if ("ScrumHeroActions".equalsIgnoreCase(tagName)) {
+                        if ("ScrumHeroActions".equalsIgnoreCase(tagName) || "ScrumAutoActions".equalsIgnoreCase(tagName)) {
                             inEntry = true;
                             scrumActions = new ArrayList<>();
                         } else if ("ScrumAction".equalsIgnoreCase(tagName)) {
                             scrumAction = new ScrumAction();
                         } else if ("ScrumEffects".equalsIgnoreCase(tagName)) {
                             inEffects = true;
+                            effectsOfAction = new ArrayList<>();
                         } else if ("ScrumEffect".equalsIgnoreCase(tagName)) {
                             effectOfAction = new EffectOfAction();
                         } else if ("ScrumStatus".equalsIgnoreCase(tagName)) {
@@ -119,7 +120,7 @@ public class ScrumActionResourseParser {
                             }
                         }
                         if (inEntry && !inStatus && !inEffects && !inConditions) {
-                            if ("ScrumHeroActions".equalsIgnoreCase(tagName)) {
+                            if ("ScrumHeroActions".equalsIgnoreCase(tagName) || "ScrumAutoActions".equalsIgnoreCase(tagName)) {
                                 inEntry = false;
                             } else if ("ScrumAction".equalsIgnoreCase(tagName)) {
                                 scrumActions.add(scrumAction);

@@ -141,7 +141,7 @@
                 <ScrumCondition>
                     <ScrumExpression>more</ScrumExpression>
                     <ScrumStatusName>range</ScrumStatusName>
-                    <ScrumValue>1</ScrumValue>
+                    <ScrumValue>0</ScrumValue>
                 </ScrumCondition>
             </ScrumConditions>
         </ScrumAction>
@@ -272,7 +272,7 @@
                     <ScrumCondition>
                         <ScrumExpression>less</ScrumExpression>
                         <ScrumStatusName>range</ScrumStatusName>
-                        <ScrumValue>1</ScrumValue>
+                        <ScrumValue>2</ScrumValue>
                     </ScrumCondition>
                 </ScrumCondition>
             </ScrumConditions>
@@ -630,17 +630,17 @@
             <ScrumEffects>
                 <ScrumEffect>
                     <ScrumEnum>changeHeroHp</ScrumEnum>
-                    <ScrumValue>-1</ScrumValue>
                     <ScrumSuccess>Мышцы и сознаие свело болью</ScrumSuccess>
                 </ScrumEffect>
+                <ScrumValue>-1</ScrumValue>
+                <ScrumConditions>
+                    <ScrumCondition>
+                        <ScrumExpression>more</ScrumExpression>
+                        <ScrumStatusName>poision</ScrumStatusName>
+                        <ScrumValue>0</ScrumValue>
+                    </ScrumCondition>
+                </ScrumConditions>
             </ScrumEffects>
-            <ScrumConditions>
-                <ScrumCondition>
-                    <ScrumExpression>more</ScrumExpression>
-                    <ScrumStatusName>poision</ScrumStatusName>
-                    <ScrumValue>0</ScrumValue>
-                </ScrumCondition>
-            </ScrumConditions>
         </ScrumAction>
         <ScrumAction>
             <ScrumIcon>none</ScrumIcon>
@@ -655,16 +655,16 @@
                         <ScrumVisible>true</ScrumVisible>
                     </ScrumStatus>
                     <ScrumValue>-1</ScrumValue>
+                    <ScrumConditions>
+                        <ScrumCondition>
+                            <ScrumExpression>more</ScrumExpression>
+                            <ScrumStatusName>poision</ScrumStatusName>
+                            <ScrumValue>0</ScrumValue>
+                        </ScrumCondition>
+                    </ScrumConditions>
                     <ScrumSuccess>огонь в жилах стал бущевать тише</ScrumSuccess>
                 </ScrumEffect>
             </ScrumEffects>
-            <ScrumConditions>
-                <ScrumCondition>
-                    <ScrumExpression>more</ScrumExpression>
-                    <ScrumStatusName>poision</ScrumStatusName>
-                    <ScrumValue>0</ScrumValue>
-                </ScrumCondition>
-            </ScrumConditions>
         </ScrumAction>
         <ScrumAction>
             <ScrumIcon>none</ScrumIcon>
@@ -679,23 +679,20 @@
                         <ScrumVisible>false</ScrumVisible>
                     </ScrumStatus>
                     <ScrumValue>chargeLevel</ScrumValue>
-                    <ScrumSuccess></ScrumSuccess>
                     <ScrumConditions>
                         <ScrumCondition>
                             <ScrumExpression>function</ScrumExpression>
                             <ScrumStatusName>normal</ScrumStatusName>
                             <ScrumValue>100</ScrumValue>
                         </ScrumCondition>
+                        <ScrumCondition>
+                            <ScrumExpression>less</ScrumExpression>
+                            <ScrumStatusName>charge</ScrumStatusName>
+                            <ScrumValue>chargeMaxValue</ScrumValue>
+                        </ScrumCondition>
                     </ScrumConditions>
                 </ScrumEffect>
             </ScrumEffects>
-            <ScrumConditions>
-                <ScrumCondition>
-                    <ScrumExpression>less</ScrumExpression>
-                    <ScrumStatusName>charge</ScrumStatusName>
-                    <ScrumValue>chargeMaxValue</ScrumValue>
-                </ScrumCondition>
-            </ScrumConditions>
         </ScrumAction>
         <ScrumAction>
             <ScrumIcon>none</ScrumIcon>
@@ -713,6 +710,11 @@
                     <ScrumSuccess>Герой стал подниматься...</ScrumSuccess>
                     <ScrumConditions>
                         <ScrumCondition>
+                            <ScrumExpression>more</ScrumExpression>
+                            <ScrumStatusName>lay</ScrumStatusName>
+                            <ScrumValue>0</ScrumValue>
+                        </ScrumCondition>
+                        <ScrumCondition>
                             <ScrumExpression>function</ScrumExpression>
                             <ScrumStatusName>normal</ScrumStatusName>
                             <ScrumValue>100</ScrumValue>
@@ -725,13 +727,6 @@
                     </ScrumConditions>
                 </ScrumEffect>
             </ScrumEffects>
-            <ScrumConditions>
-                <ScrumCondition>
-                    <ScrumExpression>more</ScrumExpression>
-                    <ScrumStatusName>lay</ScrumStatusName>
-                    <ScrumValue>0</ScrumValue>
-                </ScrumCondition>
-            </ScrumConditions>
         </ScrumAction>
         <ScrumAction>
             <ScrumIcon>none</ScrumIcon>
@@ -742,32 +737,20 @@
                     <ScrumEnum>setHeroStatus</ScrumEnum>
                     <ScrumStatus>
                         <ScrumName>lay</ScrumName>
-                        <ScrumValue>0</ScrumValue>
                         <ScrumDescription>Лежит</ScrumDescription>
                         <ScrumVisible>true</ScrumVisible>
                     </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
                     <ScrumSuccess>и встал на ноги</ScrumSuccess>
                     <ScrumConditions>
                         <ScrumCondition>
-                            <ScrumExpression>function</ScrumExpression>
-                            <ScrumStatusName>normal</ScrumStatusName>
-                            <ScrumValue>100</ScrumValue>
-                        </ScrumCondition>
-                        <ScrumCondition>
-                            <ScrumExpression>function</ScrumExpression>
-                            <ScrumStatusName>disorientation</ScrumStatusName>
-                            <ScrumValue>-30</ScrumValue>
+                            <ScrumExpression>equals</ScrumExpression>
+                            <ScrumStatusName>lay</ScrumStatusName>
+                            <ScrumValue>0</ScrumValue>
                         </ScrumCondition>
                     </ScrumConditions>
                 </ScrumEffect>
             </ScrumEffects>
-            <ScrumConditions>
-                <ScrumCondition>
-                    <ScrumExpression>equals</ScrumExpression>
-                    <ScrumStatusName>lay</ScrumStatusName>
-                    <ScrumValue>0</ScrumValue>
-                </ScrumCondition>
-            </ScrumConditions>
         </ScrumAction>
         <ScrumAction>
             <ScrumIcon>none</ScrumIcon>
@@ -778,19 +761,17 @@
                     <ScrumEnum>setHeroStatus</ScrumEnum>
                     <ScrumStatus>
                         <ScrumName>cut</ScrumName>
-                        <ScrumValue>0</ScrumValue>
                         <ScrumDescription>Ранен</ScrumDescription>
                         <ScrumVisible>true</ScrumVisible>
                     </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
+                    <ScrumCondition>
+                        <ScrumExpression>equals</ScrumExpression>
+                        <ScrumStatusName>maxHp</ScrumStatusName>
+                        <ScrumValue>Hp</ScrumValue>
+                    </ScrumCondition>
                 </ScrumEffect>
             </ScrumEffects>
-            <ScrumConditions>
-                <ScrumCondition>
-                    <ScrumExpression>equals</ScrumExpression>
-                    <ScrumStatusName>maxHp</ScrumStatusName>
-                    <ScrumValue>Hp</ScrumValue>
-                </ScrumCondition>
-            </ScrumConditions>
         </ScrumAction>
     </ScrumAutoActions>
 </ScrumActions>

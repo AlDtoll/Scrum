@@ -126,6 +126,12 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
                     case CHANGE_ENEMY_STATUS:
                         directorPresenter.changeEnemyStatus(effectOfAction.getStatus(), value);
                         break;
+                    case SET_HERO_STATUS:
+                        directorPresenter.setHeroStatus(effectOfAction.getStatus(), value);
+                        break;
+                    case SET_ENEMY_STATUS:
+                        directorPresenter.setEnemyStatus(effectOfAction.getStatus(), value);
+                        break;
                     case CHANGE_ENEMY_HP:
                         directorPresenter.changeEnemyHp(value);
                         break;
@@ -174,6 +180,6 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
     }
 
     private boolean isNumeric(String string) {
-        return string.matches("\\d+");
+        return string.matches("[0-9]+") || string.startsWith("-");
     }
 }

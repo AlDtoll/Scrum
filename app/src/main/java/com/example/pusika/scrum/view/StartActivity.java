@@ -214,23 +214,23 @@ public class StartActivity extends AppCompatActivity {
             t.printStackTrace();
         }
 
-//        String contentForAutoAction = content.substring(content.indexOf("<ScrumAutoActions"), content.indexOf("</ScrumAutoActions>"));
-//        try {
-//            xmlPullParser.setInput(new StringReader(contentForAutoAction));
-//        } catch (XmlPullParserException e) {
-//            e.printStackTrace();
-//        }
-//        try {
-//            ScrumActionResourseParser scrumActionResourseParser = new ScrumActionResourseParser(this);
-//            if (scrumActionResourseParser.parse(xmlPullParser)) {
-//                scrumAutoActions = scrumActionResourseParser.getActions();
-//                processSuccessValue++;
-//            }
-//        } catch (Throwable t) {
-//            t.printStackTrace();
-//        }
+        String contentForAutoAction = content.substring(content.indexOf("<ScrumAutoActions"), content.indexOf("</ScrumAutoActions>"));
+        try {
+            xmlPullParser.setInput(new StringReader(contentForAutoAction));
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        }
+        try {
+            ScrumActionResourseParser scrumActionResourseParser = new ScrumActionResourseParser(this);
+            if (scrumActionResourseParser.parse(xmlPullParser)) {
+                scrumAutoActions = scrumActionResourseParser.getActions();
+                processSuccessValue++;
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
 
-        return processSuccessValue == 4;
+        return processSuccessValue == 5;
     }
 
     private void setPresentation() {

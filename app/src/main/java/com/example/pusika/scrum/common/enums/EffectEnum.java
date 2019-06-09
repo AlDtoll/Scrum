@@ -27,7 +27,10 @@ public enum EffectEnum {
     /**
      * Изменить длительность раунда
      */
-    CHANGE_ROUND_TIME("changeRoundTime");
+    CHANGE_ROUND_TIME("changeRoundTime"),
+
+    SET_HERO_STATUS("setHeroStatus"),
+    SET_ENEMY_STATUS("setEnemyStatus");
     private String code;
 
     EffectEnum(String code) {

@@ -326,6 +326,7 @@ public class DirectorPresenter implements Stuntman, Serializable {
 
     private void createResultOfRound(Bundle args) {
         //todo нужно ли это все здесь? или только в конце?
+        addResultOfRoundToStatus();
         StringBuilder message = new StringBuilder();
         message.append("За раунд герой нанес ").append(scene.getHits()).append(" ударов, ")
                 .append("\n")
@@ -344,6 +345,17 @@ public class DirectorPresenter implements Stuntman, Serializable {
                 .append(scene.getEnemy().getStatuses());
 
         args.putString(RESULT_OF_ROUND, String.valueOf(message));
+    }
+
+    private void addResultOfRoundToStatus() {
+        ArrayList<Status> statuses = scene.getHero().getStatuses();
+        changeHeroStatus(new Status("hits", scene.getHits(), "герой нанес ударов", false), scene.getHits());
+        changeHeroStatus(new Status("misses", scene.getMisses(), "герой промахнулся", false), scene.getMisses());
+        changeHeroStatus(new Status("blocks", scene.getBlocks(), "герой заблокировал ударов", false), scene.getBlocks());
+        changeHeroStatus(new Status("cuts", scene.getCuts(), "герой получил ударов", false), scene.getCuts());
+        if (scene.getCuts() > 0) {
+            changeHeroStatus(new Status("cut", 1, "Ранен", false), 1);
+        }
     }
 
     public void showResultOfActions(ArrayList<String> resultOfActions) {
@@ -448,6 +460,38 @@ public class DirectorPresenter implements Stuntman, Serializable {
         for (Status status : statuses) {
             if (status.getName().equals(statusForChange.getName())) {
                 status.setValue(status.getValue() + value);
+                isChanged = true;
+            }
+        }
+        if (!isChanged) {
+            statusForChange.setValue(value);
+            statuses.add(statusForChange);
+        }
+    }
+
+    @Override
+    public void setHeroStatus(Status statusForChange, int value) {
+        boolean isChanged = false;
+        ArrayList<Status> statuses = getScene().getHero().getStatuses();
+        for (Status status : statuses) {
+            if (status.getName().equals(statusForChange.getName())) {
+                status.setValue(value);
+                isChanged = true;
+            }
+        }
+        if (!isChanged) {
+            statusForChange.setValue(value);
+            statuses.add(statusForChange);
+        }
+    }
+
+    @Override
+    public void setEnemyStatus(Status statusForChange, int value) {
+        boolean isChanged = false;
+        ArrayList<Status> statuses = getScene().getEnemy().getStatuses();
+        for (Status status : statuses) {
+            if (status.getName().equals(statusForChange.getName())) {
+                status.setValue(value);
                 isChanged = true;
             }
         }

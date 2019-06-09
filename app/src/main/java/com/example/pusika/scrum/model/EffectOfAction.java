@@ -76,7 +76,7 @@ public class EffectOfAction implements Serializable {
     }
 
     public String getSuccess() {
-        return success;
+        return success != null ? success : "";
     }
 
     public void setSuccess(String success) {
@@ -84,7 +84,7 @@ public class EffectOfAction implements Serializable {
     }
 
     public String getFail() {
-        return fail;
+        return fail != null ? fail : "";
     }
 
     public void setFail(String fail) {

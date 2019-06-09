@@ -33,4 +33,8 @@ public interface Stuntman {
     void changeHeroStatus(Status statusForChange, int value);
 
     void changeEnemyStatus(Status statusForChange, int value);
+
+    void setHeroStatus(Status statusForChange, int value);
+
+    void setEnemyStatus(Status statusForChange, int value);
 }

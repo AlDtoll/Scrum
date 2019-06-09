@@ -26,56 +26,61 @@ public class ConditionOf implements Serializable {
             return true;
         }
         int point = 0;
+        boolean isFunction = false;
         for (ConditionOf conditionOf : conditionOfs) {
-            ArrayList<Status> statuses;
-            if (conditionOf.getTargetForCheck() == TargetEnum.ENEMY) {
-                statuses = scene.getEnemy().getStatuses();
-            } else if (conditionOf.getTargetForCheck() == TargetEnum.PLACE) {
-                statuses = scene.getPlace().getStatuses();
+            int value;
+            String conditionOfValue = conditionOf.getValue();
+            if (isNumeric(conditionOfValue)) {
+                value = Integer.parseInt(conditionOfValue);
             } else {
-                statuses = scene.getHero().getStatuses();
+                value = findValue(conditionOfValue, scene);
             }
-            for (Status status : statuses) {
-                if (status.getName().equalsIgnoreCase(conditionOf.getStatusName())) {
-                    int statusValue = status.getValue();
-                    int value;
-                    String conditionOfValue = conditionOf.getValue();
-                    if (isNumeric(conditionOfValue)) {
-                        value = Integer.parseInt(conditionOfValue);
-                    } else {
-                        value = findValue(conditionOfValue, scene);
-                    }
-                    if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_MORE)) {
-                        if (statusValue >= value) {
-                            return true;
-                        }
-                    }
-                    if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_LESS)) {
-                        if (statusValue <= value) {
-                            return true;
-                        }
-                    }
-                    if (conditionOf.getExpression() == (ExpressionEnum.MORE)) {
-                        if (statusValue <= value) {
-                            return false;
-                        }
-                    }
-                    if (conditionOf.getExpression() == (ExpressionEnum.LESS)) {
-                        if (statusValue >= value) {
-                            return false;
-                        }
-                    }
-                    if (conditionOf.getExpression() == ExpressionEnum.FUNCTION) {
-                        point += statusValue * value;
-                    } else {
-                        return true;
-                    }
+            String conditionOfStatusName = conditionOf.getStatusName();
+
+            ArrayList<Status> statusesForCheck;
+            if (conditionOf.getTargetForCheck() == TargetEnum.ENEMY) {
+                statusesForCheck = scene.getEnemy().getStatuses();
+            } else if (conditionOf.getTargetForCheck() == TargetEnum.PLACE) {
+                statusesForCheck = scene.getPlace().getStatuses();
+            } else {
+                statusesForCheck = scene.getHero().getStatuses();
+            }
+            int statusValue = 0;
+            for (Status status : statusesForCheck) {
+                if (status.getName().equalsIgnoreCase(conditionOfStatusName)) {
+                    statusValue = status.getValue();
+                    break;
                 }
+            }
+
+            if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_MORE)) {
+                if (statusValue > value) {
+                    return true;
+                }
+            }
+            if (conditionOf.getExpression() == (ExpressionEnum.ENOUGH_LESS)) {
+                if (statusValue < value) {
+                    return true;
+                }
+            }
+            if (conditionOf.getExpression() == (ExpressionEnum.MORE)) {
+                if (statusValue <= value) {
+                    return false;
+                }
+            }
+            if (conditionOf.getExpression() == (ExpressionEnum.LESS)) {
+                if (statusValue >= value) {
+                    return false;
+                }
+            }
+            if (conditionOf.getExpression() == ExpressionEnum.FUNCTION) {
+                point += statusValue * value;
+                isFunction = true;
             }
         }
         Random random = new Random(new Date().getTime());
         int percent = random.nextInt(100) + 1;
-        return point > percent;
+        return isFunction ? point > percent : true;
     }
 
     public String getStatusName() {
@@ -95,7 +100,7 @@ public class ConditionOf implements Serializable {
     }
 
     private static boolean isNumeric(String string) {
-        return string.matches("\\d+");
+        return string.matches("[0-9]+") || string.startsWith("-");
     }
 
     private static int findValue(String effectOfActionValue, Scene scene) {
