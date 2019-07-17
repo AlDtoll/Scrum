@@ -15,6 +15,7 @@ import com.example.pusika.scrum.model.Fighter;
 import com.example.pusika.scrum.model.Scene;
 import com.example.pusika.scrum.model.StatisticsCollector;
 import com.example.pusika.scrum.model.Status;
+import com.example.pusika.scrum.view.FinishActivity;
 import com.example.pusika.scrum.view.MainActivity;
 import com.example.pusika.scrum.view.Playground;
 import com.example.pusika.scrum.view.Stuntman;
@@ -98,6 +99,7 @@ public class DirectorPresenter implements Stuntman, Serializable {
     }
 
     public void createStartBattleDialog() {
+        //todo статусы бойцов
         String message = scene.getHero().getName() +
                 " против " +
                 scene.getEnemy().getName();
@@ -171,7 +173,7 @@ public class DirectorPresenter implements Stuntman, Serializable {
     }
 
     private void makeMiss() {
-
+        scene.miss();
     }
 
     public void createListeners() {
@@ -296,7 +298,7 @@ public class DirectorPresenter implements Stuntman, Serializable {
     }
 
     private void victory() {
-
+        FinishActivity.Companion.start((Activity) getPlayground());
     }
 
     private void defeat() {
@@ -348,7 +350,6 @@ public class DirectorPresenter implements Stuntman, Serializable {
     }
 
     private void addResultOfRoundToStatus() {
-        ArrayList<Status> statuses = scene.getHero().getStatuses();
         changeHeroStatus(new Status("hits", scene.getHits(), "герой нанес ударов", false), scene.getHits());
         changeHeroStatus(new Status("misses", scene.getMisses(), "герой промахнулся", false), scene.getMisses());
         changeHeroStatus(new Status("blocks", scene.getBlocks(), "герой заблокировал ударов", false), scene.getBlocks());
@@ -375,7 +376,7 @@ public class DirectorPresenter implements Stuntman, Serializable {
         builder.show();
     }
 
-    public void startNewRound() {
+    private void startNewRound() {
         getPlayground().setTimeProgressBarValue(MAX_DRAWABLE_VALUE / 2);
         getPlayground().setRoundTimeProgressBarValue(0);
         getScene().startRound();

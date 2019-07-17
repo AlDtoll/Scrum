@@ -102,7 +102,9 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
 
     private void executeAutoActions() {
         for (ScrumAction scrumAction : scrumAutoActions) {
-            executeAction(scrumAction.getEffectsOfAction());
+            if (ConditionOf.isCondition(scrumAction.getConditionsOfAction(), directorPresenter.getScene())) {
+                executeAction(scrumAction.getEffectsOfAction());
+            }
         }
     }
 
@@ -144,9 +146,14 @@ public class TimeoutDialog extends DialogFragment implements View.OnClickListene
                     default:
                         throw new UnsupportedOperationException("в настоящий момент такой эффект не поддерживается");
                 }
-                resultOfActions.add(effectOfAction.getSuccess());
+                if (!effectOfAction.getSuccess().equals("")) {
+                    resultOfActions.add(effectOfAction.getSuccess());
+                }
             } else {
-                resultOfActions.add(effectOfAction.getFail());
+                if (!effectOfAction.getFail().equals("")) {
+                    resultOfActions.add(effectOfAction.getFail());
+                }
+
             }
         }
     }

@@ -696,18 +696,19 @@
         </ScrumAction>
         <ScrumAction>
             <ScrumIcon>none</ScrumIcon>
-            <ScrumName>Подниматься</ScrumName>
-            <ScrumDescription>Подниматься из лежачего положения</ScrumDescription>
+            <ScrumName>Начать подниматься</ScrumName>
+            <ScrumDescription>Начать подниматься из лежачего положения</ScrumDescription>
             <ScrumEffects>
                 <ScrumEffect>
-                    <ScrumEnum>changeHeroStatus</ScrumEnum>
+                    <ScrumEnum>setHeroStatus</ScrumEnum>
                     <ScrumStatus>
-                        <ScrumName>lay</ScrumName>
-                        <ScrumDescription>Лежит</ScrumDescription>
+                        <ScrumName>standUp</ScrumName>
+                        <ScrumDescription>Вставать</ScrumDescription>
                         <ScrumVisible>true</ScrumVisible>
                     </ScrumStatus>
-                    <ScrumValue>-1</ScrumValue>
+                    <ScrumValue>1</ScrumValue>
                     <ScrumSuccess>Герой стал подниматься...</ScrumSuccess>
+                    <ScrumFail>герой не смог начать подниматься...</ScrumFail>
                     <ScrumConditions>
                         <ScrumCondition>
                             <ScrumExpression>more</ScrumExpression>
@@ -717,12 +718,42 @@
                         <ScrumCondition>
                             <ScrumExpression>function</ScrumExpression>
                             <ScrumStatusName>normal</ScrumStatusName>
-                            <ScrumValue>100</ScrumValue>
+                            <ScrumValue>80</ScrumValue>
                         </ScrumCondition>
                         <ScrumCondition>
                             <ScrumExpression>function</ScrumExpression>
                             <ScrumStatusName>disorientation</ScrumStatusName>
                             <ScrumValue>-30</ScrumValue>
+                        </ScrumCondition>
+                    </ScrumConditions>
+                </ScrumEffect>
+            </ScrumEffects>
+            <ScrumConditions>
+                <ScrumCondition>
+                    <ScrumExpression>more</ScrumExpression>
+                    <ScrumStatusName>lay</ScrumStatusName>
+                    <ScrumValue>0</ScrumValue>
+                </ScrumCondition>
+            </ScrumConditions>
+        </ScrumAction>
+        <ScrumAction>
+            <ScrumIcon>none</ScrumIcon>
+            <ScrumName>Вставать</ScrumName>
+            <ScrumDescription>Вставать из лежачего положения</ScrumDescription>
+            <ScrumEffects>
+                <ScrumEffect>
+                    <ScrumEnum>changeHeroStatus</ScrumEnum>
+                    <ScrumStatus>
+                        <ScrumName>lay</ScrumName>
+                        <ScrumDescription>Лежит</ScrumDescription>
+                        <ScrumVisible>true</ScrumVisible>
+                    </ScrumStatus>
+                    <ScrumValue>-1</ScrumValue>
+                    <ScrumConditions>
+                        <ScrumCondition>
+                            <ScrumExpression>more</ScrumExpression>
+                            <ScrumStatusName>standUp</ScrumStatusName>
+                            <ScrumValue>0</ScrumValue>
                         </ScrumCondition>
                     </ScrumConditions>
                 </ScrumEffect>
@@ -740,15 +771,37 @@
                         <ScrumDescription>Лежит</ScrumDescription>
                         <ScrumVisible>true</ScrumVisible>
                     </ScrumStatus>
+                    <ScrumSuccess>...и поднялся на ноги</ScrumSuccess>
+                    <ScrumFail>...но не успел подняться</ScrumFail>
                     <ScrumValue>0</ScrumValue>
-                    <ScrumSuccess>и встал на ноги</ScrumSuccess>
-                    <ScrumConditions>
-                        <ScrumCondition>
-                            <ScrumExpression>equals</ScrumExpression>
-                            <ScrumStatusName>lay</ScrumStatusName>
-                            <ScrumValue>0</ScrumValue>
-                        </ScrumCondition>
-                    </ScrumConditions>
+                </ScrumEffect>
+            </ScrumEffects>
+            <ScrumConditions>
+                <ScrumCondition>
+                    <ScrumExpression>more</ScrumExpression>
+                    <ScrumStatusName>standUp</ScrumStatusName>
+                    <ScrumValue>0</ScrumValue>
+                </ScrumCondition>
+                <ScrumCondition>
+                    <ScrumExpression>less</ScrumExpression>
+                    <ScrumStatusName>lay</ScrumStatusName>
+                    <ScrumValue>1</ScrumValue>
+                </ScrumCondition>
+            </ScrumConditions>
+        </ScrumAction>
+        <ScrumAction>
+            <ScrumIcon>none</ScrumIcon>
+            <ScrumName>Перестать подниматься</ScrumName>
+            <ScrumDescription>Перестать подниматься из лежачего положения</ScrumDescription>
+            <ScrumEffects>
+                <ScrumEffect>
+                    <ScrumEnum>setHeroStatus</ScrumEnum>
+                    <ScrumStatus>
+                        <ScrumName>standUp</ScrumName>
+                        <ScrumDescription>Лежит</ScrumDescription>
+                        <ScrumVisible>true</ScrumVisible>
+                    </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
                 </ScrumEffect>
             </ScrumEffects>
         </ScrumAction>
@@ -770,6 +823,49 @@
                         <ScrumStatusName>maxHp</ScrumStatusName>
                         <ScrumValue>Hp</ScrumValue>
                     </ScrumCondition>
+                </ScrumEffect>
+            </ScrumEffects>
+        </ScrumAction>
+        <ScrumAction>
+            <ScrumIcon>none</ScrumIcon>
+            <ScrumName>Обнулить результаты раунда</ScrumName>
+            <ScrumDescription>Сделать hits, cuts, blocks, misses нулями</ScrumDescription>
+            <ScrumEffects>
+                <ScrumEffect>
+                    <ScrumEnum>setHeroStatus</ScrumEnum>
+                    <ScrumStatus>
+                        <ScrumName>hits</ScrumName>
+                        <ScrumDescription>ударов</ScrumDescription>
+                        <ScrumVisible>true</ScrumVisible>
+                    </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
+                </ScrumEffect>
+                <ScrumEffect>
+                    <ScrumEnum>setHeroStatus</ScrumEnum>
+                    <ScrumStatus>
+                        <ScrumName>cuts</ScrumName>
+                        <ScrumDescription>ранений</ScrumDescription>
+                        <ScrumVisible>true</ScrumVisible>
+                    </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
+                </ScrumEffect>
+                <ScrumEffect>
+                    <ScrumEnum>setHeroStatus</ScrumEnum>
+                    <ScrumStatus>
+                        <ScrumName>blocks</ScrumName>
+                        <ScrumDescription>блоков</ScrumDescription>
+                        <ScrumVisible>true</ScrumVisible>
+                    </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
+                </ScrumEffect>
+                <ScrumEffect>
+                    <ScrumEnum>setHeroStatus</ScrumEnum>
+                    <ScrumStatus>
+                        <ScrumName>misses</ScrumName>
+                        <ScrumDescription>Ранен</ScrumDescription>
+                        <ScrumVisible>true</ScrumVisible>
+                    </ScrumStatus>
+                    <ScrumValue>0</ScrumValue>
                 </ScrumEffect>
             </ScrumEffects>
         </ScrumAction>

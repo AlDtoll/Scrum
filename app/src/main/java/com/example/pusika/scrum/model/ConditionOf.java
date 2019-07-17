@@ -73,6 +73,11 @@ public class ConditionOf implements Serializable {
                     return false;
                 }
             }
+            if (conditionOf.getExpression() == (ExpressionEnum.EQUALS)) {
+                if (statusValue != value) {
+                    return false;
+                }
+            }
             if (conditionOf.getExpression() == ExpressionEnum.FUNCTION) {
                 point += statusValue * value;
                 isFunction = true;
